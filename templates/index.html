@@ -1,0 +1,184 @@
+<html>
+    <head>
+        <title>blogging site</title>
+       
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    
+<body>
+    <!-- for backgroun color -->
+    <div class="background"></div>
+    <!-- trans box -->
+    <div class="transbox">
+        
+        <!-- for picture -->
+        <img src="{{url_for('static',filename='photos/image6.jpg')}}"  width="47%"  height="83%" style="margin: 5% 0% 0% 53%; position: fixed; border-radius: 25px 25px 25px 25px;"> 
+        <!-- image of blogger -->
+        <!-- <img src="{{url_for('static',filename='photos/blogger.png')}}"  width="5%"  height="5%" style="margin: 0% 0% 0% 0%; position: fixed;">
+         -->
+        <!-- or blogeer text -->
+        <div style="margin: 0% 0% 0% 2%; font-weight: bolder; font-size: 45px;color: rgba(0, 0, 0, 0.634);position: fixed;">Blogger</div>
+        <!-- for signIn button  -->
+        <div style="margin: 0% 0% 0% 90%; position: fixed; font-weight: bolder; color: rgba(0, 0, 0, 0.634);font-size: 20px; ">
+        <p ><a href="#" id="signupLink" style="color:rgba(0, 0, 0, 0.634); text-decoration: none;">Sign Up</a></p>
+        </div>
+        
+        <!-- for faq  -->
+        <div style="margin: 0% 0% 0% 83%; position: fixed; font-weight: bolder; color: rgba(0, 0, 0, 0.634);font-size: 20px; cursor: pointer;">
+            <p>FAQs</p>
+        </div>  
+        <!-- for contact  --> 
+        <div style="margin: 0% 0% 0% 73%; position: fixed; font-weight: bolder; color: rgba(0, 0, 0, 0.634);font-size: 20px;cursor: pointer;">
+            <p>Contact Us</p>
+        </div> 
+        <!-- for Aboutn  -->
+        <div style="margin: 0% 0% 0% 64%; position: fixed; font-weight: bolder; color: rgba(0, 0, 0, 0.634);font-size: 20px; cursor: pointer;">
+            <p>About Us</p>
+        </div>
+        <!-- for home -->
+        <div style="margin: 0% 0% 0% 57%; position: fixed; font-weight: bolder; color: rgba(0, 0, 0, 0.634);font-size: 20px; cursor: pointer;">
+            <p>Home</p>
+        </div>
+        
+        <form action="/user/login/" , method="post">
+            <p style="position: fixed;margin: 15% 0% 0% 4%; font-weight: bolder; font-size: 40px; color: rgba(0, 0, 0, 0.634);">Focus on producing a blog </p> <br>
+            <p style="position: fixed;margin: 17% 0% 0% 4%; font-weight: bolder; font-size: 35px; color: rgba(0, 0, 0, 0.634);">that's great for </p> <br>
+            <p style="position: fixed;margin: 19% 0% 0% 4%; font-weight: bolder; font-size: 30px; color: rgba(0, 0, 0, 0.634);"> your readers </p> <br>
+            <p style="font-size: 12px;margin: 21% 0% 0% 4%;position: fixed; color: red">{{err_msg}}</p>
+            <input type="text" id = "username" name="username" placeholder="Username.." onchange="updateForgotLink()"><br>
+            <input type="password" name="password" placeholder="Password.."><br>
+            <input type="submit" value="Login"><br>
+            <p style="font-size: 14px; margin-left: 13%; cursor: pointer;">Don't have a Blogger account?</p>
+            <!-- // for foget password -->
+            <p style="font-size: 14px; position: fixed;margin: -2.2% 0% 0% 26%;"><a id="forgotLink" href="#">Forgot Password</a></p>
+        </form>
+
+    
+    
+    </div>
+
+    <!-- The Modal -->
+    <div id="signupDiv" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span><br>
+                <h2>Create New Blogger Account</h2>
+            <form action="/user/signup/" method="post">
+                <input type="text" name="f_name" placeholder="First Name.."  required style="margin: 2% 0% 0% -14%; position: fixed;">
+                <input type="text" name="l_name" placeholder="Last Name.." required style="margin: 6% 0% 0% -14%; position: fixed;">
+                <input type="email" name="email" placeholder="Email.." required style="margin: 10% 0% 0% -14%;position: fixed;">
+                <input type="number" name="contact" placeholder="Contact.." maxlength="10" required style="margin: 14% 0% 0% -14%; position: fixed;">
+                <input type="password" id="pwd" name="password" placeholder="Password.."style="margin: 18% 0% 0% -14%;">
+                <p><i id = "pwd_icon" class="fa fa-eye" 
+                    onclick="passwordToggle()" 
+                    aria-hidden="true" 
+                    style="position: absolute; z-index: 2; margin: 19%; display: inline; cursor: pointer;"></i></p>
+                
+                <input type="submit" value="Create Account"style="margin: 45% 0% 0% -7%;">
+            </form>
+        </div>
+
+    </div>
+    <script>
+
+// for foget password
+        function updateForgotLink(){
+            console.log("Onchange Hitted");
+            var email = document.getElementById('username').value;
+            var forgotLink = document.getElementById("forgotLink");
+            forgotLink.href = `/user/forgotpassword/?email=${email}`;
+            }
+
+        // Get the modal
+        var modal = document.getElementById("signupDiv");
+        
+        // Get the button that opens the modal
+        var btn = document.getElementById("signupLink");
+        
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+        
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+          modal.style.display = "block";
+        }
+        
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+        
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }
+        //  for password
+
+        function passwordToggle(){
+            let pwd_field = document.getElementById("pwd");
+            let icon = document.getElementById("pwd_icon");
+            if (pwd_field.type == "password"){
+                pwd_field.type = "text";
+                icon.className = "fa fa-eye-slash";
+            }else{
+                pwd_field.type = "password";
+                icon.className = "fa fa-eye";
+            }
+
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            var userMenu = document.querySelector('.user-menu');
+
+            // Close the menu when clicking outside of it
+            window.addEventListener('click', function(event) {
+                if (!event.target.closest('.user')) {
+                    userMenu.style.display = 'none';
+                }
+            });
+
+            // Prevent closing the menu when clicking inside it
+            userMenu.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        });
+    </script>    
+    
+    
+
+    
+   
+
+     
+    
+    
+        
+    
+    
+    
+</body>
+</html>
+
+
+
+
+<!-- 
+
+ image of blogger
+ <img src="{{url_for('static',filename='photos/blogger.png')}}"  width="5%"  height="5%" style="margin: 2% 0% 0% 0%; position: fixed;">
+ for blogeer text
+ <div style="margin: 2% 0% 0% 6%; font-weight: bolder; font-size: 45px;color: rgba(0, 0, 0, 0.634);position: fixed;">Blogger</div>
+ for signIn button 
+ <div style="margin: 2% 0% 0% 90%; position: fixed; font-weight: bolder; color: rgba(0, 0, 0, 0.634);">
+     <p>SIGN IN</p>
+
+ </div>that's great for your readers
+  image2 of blogger
+  <div>
+     <img src="{{url_for('static',filename='photos/image1.jpg')}}"  width="30%"  height="60%" style="margin: 9% 0% 0% 35%; position: fixed;"> 
+  </div> -->

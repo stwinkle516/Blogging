@@ -1,0 +1,603 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <title>blogging site</title>
+
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <!-- for backgroun color -->
+    <div class="background"></div>
+    <!-- trans box -->
+
+    <div class="transbox">
+        <!-- or blogeer text -->
+        <div
+            style="margin: 0% 0% 0% 2%; font-weight: bolder; font-size: 45px;color: rgba(0, 0, 0, 0.634);position: fixed;">
+            Blogger</div>
+        <div class="user">
+            <div class="user-icon"> <i class="fa fa-user-circle-o" aria-hidden="true"
+                    style=" position: fixed; margin: 2% 0% 0% 96%; font-size: 40px; color: #150292a2;"></i>&nbsp;</div>
+            <div class="navbar">
+                <a href="/home/">Home</a>
+                <a href="#news">News</a>
+                <div class="dropdown">
+                    <button class="dropbtn">{{current_user.Firstname}}
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="#" id="blogLink" onclick="openblogDiv()">Create Blog</a>
+                        <a href="#">My blog</a>
+                        <a href="#" id="editLink" onclick="openProfileDiv()">Edit Profile</a>
+                        <a href="#" id="changeLink" onclick="openPassDiv()">Change Password</a>
+                        <a href="/user/logout/">Logout</a>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+        <div class="transbox2" style="display: flex; flex-wrap: wrap; overflow-y: auto; ">
+
+
+
+
+
+
+            {% for i in blog_data %}
+            <div class="piccontain {% if i.blog_category.category == 'EVENT' %} EVENT 
+        {% elif i.blog_category.category == 'SCIENCE'%} SCIENCE 
+        {% elif i.blog_category.category == 'TECHNOLOGY'%} TECHNOLOGY
+        {% elif i.blog_category.category == 'FOOD'%} FOOD
+        {% elif i.blog_category.category == 'FASHION'%} FASHION
+        {% elif i.blog_category.category == 'GENERAL'%} GENERAL
+        {% elif i.blog_category.category == 'MARKETING'%} MARKETING
+         
+        
+        
+        {%endif%} "></div>
+
+
+            <div class="blog-content">
+                <div class="blog-util">
+                    <i class="fa fa-user-circle-o" aria-hidden="true"
+                        style="color: #150292a2; margin: 1% 0% 0% 1%; "></i>&nbsp;
+                    <p style="margin: -2% 0% 0% 3.5%; font-family: sans-serif;">{{i.blog_user.Firstname}}</p>
+                    <p style="margin: -1% 0% 0% 85%; ;font-size: 11px; ">{{i.created_at}}</p><br>
+                </div>
+                <div class="blog-util"
+                    style="text-align: center;border-bottom:1px solid black ; font-family: sans-serif;">
+                    <b>{{i.title}}</b></div>
+
+                {% if i.content|length >= 120 %}
+                <div class="blog-data" onclick="openblogviewDiv('blogviewDiv-{{i}}')"
+                    style="cursor: pointer; font-family: sans-serif;">{{i.content[0:300]}}....</div>
+                {% else %}
+                <div class="blog-data" onclick="openblogviewDiv('blogviewDiv-{{i}}')">{{i.content}}</div>
+                {% endif %}
+                <div class="blog-util" style="border-top:1px solid black ;display: flex; align-items: center;">
+                    <p style="font-size: 11px; background-color: #adadad; padding:2px ;width: 20%;text-align: center; ">
+                        {{i.blog_category.category}}</p>
+                    
+                    {% set temp=[]%}
+                    {% for j in i.blog_response if j.response_type == 1 %}
+                        {% set _ =temp.append(j.user_id)%}
+
+                    {% endfor %}
+
+                    {%if current_user.id in temp%}  
+                    <i id="like-icon-{{i}}" class="fa fa-thumbs-up util-icon right" aria-hidden="true"
+                        onclick="callLike('{{i}}','/blogs/like/?blog_id={{i.id}}&location=home')"></i>&nbsp;{{temp|length}}&nbsp;&nbsp;
+                    {% else %}
+                    <i id="like-icon-{{i}}" class="fa fa-thumbs-o-up util-icon right" aria-hidden="true"
+                        onclick="callLike('{{i}}','/blogs/like/?blog_id={{i.id}}&location=home')"></i>&nbsp;{{temp|length}}&nbsp;&nbsp;
+                    {% endif %}
+                    
+                    <i class="fa fa-comments util-icon" aria-hidden="true"></i>
+
+                </div>
+
+            </div>
+
+            <!-- blog modal -->
+
+            <div id="blogviewDiv-{{i}}" class="modal">
+
+                <div class="modal-content"
+                    style="height: 70%; width: 45%;  display: flex; flex-wrap: wrap; overflow-y: auto; border-radius: 10px;">
+
+                    <span class="blogviewClose" style="margin: -38% 0% 0% 44%; position: fixed;">&times;</span><br>
+                   
+    
+    
+                <p id="errorMsg" style="color: red;"></p>
+    
+                <div> <i class="fa fa-user-circle-o" aria-hidden="true"
+                    style=" position: fixed; margin: -18% 0% 0% 19%; font-size: 90px;"></i>&nbsp;</div>
+
+                <form action="/blogs/update/?blog_id={{i.id}}" method="post">
+                    
+                    <input type="text" name="blog_title" value="{{i.title}}" 
+                        style=" margin: -9% 0% 0% 7%; position: fixed; width: 30%;" required>
+                    
+                    <select name="category" id="" style="margin:-5% 0% 0% 7%; position: fixed; width: 30%; height: 5%;display: inline-block;
+                border: 2px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+                transition: 0.5s;
+                outline: none;" required>
+                    <option value={{i.blog_category.id}}>{{i.blog_category.category}}</option>
+                    {% for k in categories if k.id != i.blog_category.id%}
+                        
+                        <option value={{k.id}}>{{k.category}}</option>
+                        {% endfor %}
+                    </select>
+                    <textarea name="blog_content" id="" cols="30" rows=" 10" required
+                        style="position: fixed; height: 26%; margin: -1% 0% 0% 7%; width: 30%;">{{i.content}}</textarea>
+    
+    
+    
+    
+    
+                    <input type="submit" value="Update Blog"
+                        style=" margin: 15% 0% 0% 16%; position: fixed; width: 15%; height: 5%;">
+                        <a class="delete" href="/blogs/delete/?blog_id={{i.id}}" style="margin: 16% 0% 0% 33%; position: fixed;">Delete</a>
+    
+    
+                </form>
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+            {% endfor %}
+        </div>
+
+
+
+
+    </div>
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+    <!-- 
+    <div class="blog-content">
+        Initial
+     </div>
+     {% for i in blog_data %}
+     <div class="blog-content" >
+         <div class="blog-util" style="display: flex;align-items: center;">
+             <i class="fa fa-user-circle-o" aria-hidden="true"></i>&nbsp;{{i.blog_user.first_name}}
+             <p style="margin-left:53% ;font-size: 11px;">{{i.created_at}}</p>
+         </div>
+         <div class="blog-util" style="text-align: center;border-bottom:1px solid black ;" ><b>{{i.title}}</b></div>
+         
+         {% if i.content|length >= 120 %}
+         <div class="blog-data">{{i.content[0:121]}}....</div>
+         {% else %}
+         <div class="blog-data">{{i.content}}</div>
+         {% endif %}
+         <div class="blog-util" style="border-top:1px solid black ;display: flex; align-items: center;" >
+             <p style="font-size: 11px; background-color: #adadad; padding:2px ;width: 20%;text-align: center;">{{i.blog_category.category}}</p>
+             <i id="like-icon-{{i}}" class="fa fa-thumbs-o-up util-icon right" aria-hidden="true" onclick="callLike('{{i}}')"></i>&nbsp;&nbsp;
+             <i class="fa fa-comments util-icon" aria-hidden="true"></i>
+             
+         </div>
+        
+     </div>
+     {% endfor %} -->
+
+
+    <!-- edit profile -->
+    <div id="signupDiv" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content" style="height: 55%; width: 45%;">
+            <span class="close">&times;</span><br>
+            <div> <i class="fa fa-user-circle-o" aria-hidden="true"
+                    style=" position: fixed; margin: -2% 0% 0% -3%; font-size: 90px;"></i>&nbsp;</div>
+
+            <form action="/user/update/" method="post">
+
+                <input type="text" name="f_name" value="{{current_user.Firstname}}" required
+                    style="margin: 6% 0% 0% -14%; position: fixed;">
+                <input type="text" name="l_name" value="{{current_user.Lastname}}" required
+                    style="margin: 10.8% 0% 0% -14%; position: fixed;">
+                <input type="email" name="email" value="{{current_user.email}}" readonly
+                    style="margin: 15.5% 0% 0% -14%;position: fixed;">
+                <input type="number" name="contact" value="{{current_user.contact}}" maxlength="10" required
+                    style="margin: 20.4% 0% 0% -14%; position: fixed;">
+
+
+                <input type="submit" value="Create Account" style="margin: 55% 0% 0% -7%; width: auto;">
+            </form>
+        </div>
+
+    </div>
+
+    <!-- change password -->
+
+
+    <div id="changeDiv" class="modal">
+
+        <div class="modal-content" style="height: 50%;">
+            <span class="changeClose">&times;</span><br>
+
+            <p id="errorMsg" style="color: red;"></p>
+            <div> <i class="fa fa-user-circle-o" aria-hidden="true"
+                    style=" position: fixed; margin: 1% 0% 0% -3%; font-size: 90px;"></i>&nbsp;</div>
+
+            <form action="/user/changepassword/" method="post">
+                <input type="password" name="old_password" id="old_pwd" placeholder="Old password...."
+                    style=" margin: 7% 0% 0% -17%; position: fixed;">
+                <p><i id="old_pwd_icon" class="fa fa-eye" onclick="OldPasswordToggle()" aria-hidden="true"
+                        style="position: absolute; z-index: 2; margin: 8% 0% 0% 16%; display: inline; cursor: pointer;"></i>
+                </p>
+
+
+                <input type="password" name="new_password" id="new_pwd" placeholder="New password...."
+                    style=" margin: 12% 0% 0% -17%; position: fixed;">
+                <p><i id="new_pwd_icon" class="fa fa-eye" onclick="NewPasswordToggle()" aria-hidden="true"
+                        style="position: absolute; z-index: 2; margin: 13% 0% 0% 16%; display: inline; cursor: pointer;"></i>
+                </p>
+                <!-- <input type="password" name=" confirm_new_password" placeholder=" Confirm New password...." style=" margin: 20% 0% 0% -17%; position: fixed;">
+             -->
+                <input type="submit" value="Change password" style=" margin: 17.6% 0% 0% -10%; position: fixed;">
+
+
+
+            </form>
+        </div>
+
+
+
+    </div>
+
+
+
+    <!--create blog  modal(create new blog)-->
+
+
+    <div id="blogDiv" class="modal">
+
+        <div class="modal-content" style="height: 60%; width: 40%;">
+
+            <span class="blogClose">&times;</span><br>
+            <div> <i class="fa fa-user-circle-o" aria-hidden="true"
+                    style=" position: fixed; margin: -1% 0% 0% -3%; font-size: 90px;"></i>&nbsp;</div>
+
+
+            <p id="errorMsg" style="color: red;"></p>
+
+
+            <form action="/blog/create/" method="post">
+                <input type="text" name="blog_title" placeholder="Title...."
+                    style=" margin: 4% 0% 0% -16%; position: fixed; width: 30%;" required>
+                <select name="category" id="" style="margin: 8% 0% 0% -16%; position: fixed; width: 30%; height: 5%;display: inline-block;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: 0.5s;
+            outline: none;" required>
+
+                    {% for i in categories %}
+                    <option value={{i.id}}>{{i.category}}</option>
+                    {% endfor %}
+                </select>
+                <textarea name="blog_content" id="" cols="30" rows=" 10" required
+                    style="position: fixed; height: 26%; margin: 12% 0% 0% -16%; width: 30%;"></textarea>
+
+
+
+
+
+                <input type="submit" value="Post Blog"
+                    style=" margin: 28% 0% 0% -8.5%; position: fixed; width: 15%; height: 5%;">
+
+
+            </form>
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+    <script>
+        // Get the modal
+        function openProfileDiv() {
+            var modal = document.getElementById("signupDiv");
+
+            // Get the button that opens the modal
+            var btn = document.getElementById("editLink");
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementsByClassName("close")[0];
+
+            // When the user clicks the button, open the modal 
+
+            modal.style.display = "block";
+
+
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function () {
+                modal.style.display = "none";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var userMenu = document.querySelector('.user-menu');
+
+                // Close the menu when clicking outside of it
+                window.addEventListener('click', function (event) {
+                    if (!event.target.closest('.user')) {
+                        userMenu.style.display = 'none';
+                    }
+                });
+
+                // Prevent closing the menu when clicking inside it
+                userMenu.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                });
+            });
+        }
+        // This is for change password modal form
+        function openPassDiv() {
+            // Get the modal
+            var pwd_modal = document.getElementById("changeDiv");
+
+            // Get the button that opens the modal
+            var pwd_btn = document.getElementById("changeLink");
+
+            // Get the <span> element that closes the modal
+            var pwd_span = document.getElementsByClassName("changeClose")[0];
+
+            // When the user clicks the button, open the modal 
+
+            pwd_modal.style.display = "block";
+
+
+            // When the user clicks on <span> (x), close the modal
+            pwd_span.onclick = function () {
+                pwd_modal.style.display = "none";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                if (event.target == pwd_modal) {
+                    pwd_modal.style.display = "none";
+                }
+            }
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var userMenu = document.querySelector('.user-menu');
+
+                // Close the menu when clicking outside of it
+                window.addEventListener('click', function (event) {
+                    if (!event.target.closest('.user')) {
+                        userMenu.style.display = 'none';
+                    }
+                });
+
+                // Prevent closing the menu when clicking inside it
+                userMenu.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                });
+            });
+
+        }
+
+
+        function openblogDiv() {
+            // Get the modal
+            var pwd_modal = document.getElementById("blogDiv");
+
+            // Get the button that opens the modal
+            var pwd_btn = document.getElementById("blogLink");
+
+            // Get the <span> element that closes the modal
+            var pwd_span = document.getElementsByClassName("blogClose")[0];
+
+            // When the user clicks the button, open the modal 
+
+            pwd_modal.style.display = "block";
+
+
+            // When the user clicks on <span> (x), close the modal
+            pwd_span.onclick = function () {
+                pwd_modal.style.display = "none";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                if (event.target == pwd_modal) {
+                    pwd_modal.style.display = "none";
+                }
+            }
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var userMenu = document.querySelector('.user-menu');
+
+                // Close the menu when clicking outside of it
+                window.addEventListener('click', function (event) {
+                    if (!event.target.closest('.user')) {
+                        userMenu.style.display = 'none';
+                    }
+                });
+
+                // Prevent closing the menu when clicking inside it
+                userMenu.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                });
+            });
+
+        }
+
+        function openblogviewDiv(divId) {
+            // Get the modal
+            var pwd_modal = document.getElementById(divId);
+
+
+
+            // Get the <span> element that closes the modal
+            var pwd_span = document.getElementsByClassName("blogviewClose")[0];
+
+            // When the user clicks the button, open the modal 
+
+            pwd_modal.style.display = "block";
+
+
+            // When the user clicks on <span> (x), close the modal
+            pwd_span.onclick = function () {
+                pwd_modal.style.display = "none";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                if (event.target == pwd_modal) {
+                    pwd_modal.style.display = "none";
+                }
+            }
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var userMenu = document.querySelector('.user-menu');
+
+                // Close the menu when clicking outside of it
+                window.addEventListener('click', function (event) {
+                    if (!event.target.closest('.user')) {
+                        userMenu.style.display = 'none';
+                    }
+                });
+
+                // Prevent closing the menu when clicking inside it
+                userMenu.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                });
+            });
+
+        }
+
+
+
+        function passwordToggle() {
+            let pwd_field = document.getElementById("pwd");
+            let icon = document.getElementById("pwd_icon");
+            if (pwd_field.type == "password") {
+                pwd_field.type = "text";
+                icon.className = "fa fa-eye-slash";
+            } else {
+                pwd_field.type = "password";
+                icon.className = "fa fa-eye";
+            }
+
+        }
+
+        function OldPasswordToggle() {
+            let pwd_field = document.getElementById("old_pwd");
+            let icon = document.getElementById("old_pwd_icon");
+            if (pwd_field.type == "password") {
+                pwd_field.type = "text";
+                icon.className = "fa fa-eye-slash";
+            } else {
+                pwd_field.type = "password";
+                icon.className = "fa fa-eye";
+            }
+
+        }
+
+        function NewPasswordToggle() {
+            let pwd_field = document.getElementById("new_pwd");
+            let icon = document.getElementById("new_pwd_icon");
+            if (pwd_field.type == "password") {
+                pwd_field.type = "text";
+                icon.className = "fa fa-eye-slash";
+            } else {
+                pwd_field.type = "password";
+                icon.className = "fa fa-eye";
+            }
+
+        }
+        // for error msg
+
+        function callLike(i,url) {
+            var icon = document.getElementById(`like-icon-${i}`)
+            if (icon.className === "fa fa-thumbs-o-up util-icon right") {
+                icon.className = "fa fa-thumbs-up util-icon right";
+            } else {
+                icon.className = "fa fa-thumbs-o-up util-icon right";
+            }
+            window.location.href = url;
+        }
+    </script>
+
+
+
+
+
+
+    {% if args %}
+    <script>
+        openPassDiv();
+
+        var error_p = document.getElementById("errorMsg");
+        error_p.innerHTML = "Old Password does not matched, Try Again";
+
+    </script>
+    {% endif %}
+
+
+
+
+</body>
+
+</html>
